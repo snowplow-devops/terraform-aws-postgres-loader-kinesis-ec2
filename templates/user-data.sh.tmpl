@@ -36,7 +36,6 @@ CREATE SCHEMA IF NOT EXISTS ${schema_name};
 EOF
 
 sudo docker run \
-  -d \
   --name create_schema \
   --network host \
 %{ if cloudwatch_logs_enabled ~}

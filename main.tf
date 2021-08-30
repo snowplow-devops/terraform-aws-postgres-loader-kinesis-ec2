@@ -3,7 +3,7 @@ locals {
   module_version = "0.1.1"
 
   app_name    = "snowplow-postgres-loader"
-  app_version = "0.2.0"
+  app_version = "0.3.1"
 
   local_tags = {
     Name           = var.name
@@ -26,7 +26,7 @@ data "aws_caller_identity" "current" {}
 
 module "telemetry" {
   source  = "snowplow-devops/telemetry/snowplow"
-  version = "0.1.0"
+  version = "0.2.0"
 
   count = var.telemetry_enabled ? 1 : 0
 
@@ -82,7 +82,7 @@ resource "aws_dynamodb_table" "kcl" {
 
 module "kcl_autoscaling" {
   source  = "snowplow-devops/dynamodb-autoscaling/aws"
-  version = "0.1.0"
+  version = "0.1.1"
 
   table_name = aws_dynamodb_table.kcl.id
 
@@ -297,17 +297,24 @@ locals {
   iglu_resolver = templatefile("${path.module}/templates/iglu_resolver.json.tmpl", { resolvers = jsonencode(local.resolvers) })
 
   config = templatefile("${path.module}/templates/config.json.tmpl", {
-    app_name         = var.name
-    in_stream_name   = var.in_stream_name
+    app_name = var.name
+
+    in_stream_name               = var.in_stream_name
+    in_max_batch_size_checkpoint = var.in_max_batch_size_checkpoint
+    in_max_batch_wait_checkpoint = var.in_max_batch_wait_checkpoint
+
     region           = data.aws_region.current.name
     initial_position = var.initial_position
-    db_host          = var.db_host
-    db_port          = var.db_port
-    db_name          = var.db_name
-    db_username      = var.db_username
-    db_password      = var.db_password
-    schema_name      = var.schema_name
-    purpose          = var.purpose
+
+    db_host            = var.db_host
+    db_port            = var.db_port
+    db_name            = var.db_name
+    db_username        = var.db_username
+    db_password        = var.db_password
+    db_max_connections = var.db_max_connections
+
+    schema_name = var.schema_name
+    purpose     = var.purpose
   })
 
   user_data = templatefile("${path.module}/templates/user-data.sh.tmpl", {
@@ -355,7 +362,7 @@ resource "aws_launch_configuration" "lc" {
 
 module "tags" {
   source  = "snowplow-devops/tags/aws"
-  version = "0.1.0"
+  version = "0.1.2"
 
   tags = local.tags
 }

@@ -4,8 +4,6 @@
 
 A Terraform module which deploys a Snowplow Postgres Loader application on AWS running on top of EC2.  If you want to use a custom AMI for this deployment you will need to ensure it is based on top of Amazon Linux 2.
 
-_WARNING_: The current version of the Postgres Loader requires very high capacity for its backing DynamoDB KCL table - we would recommend avoiding using this application for high volume traffic.
-
 ## Telemetry
 
 This module by default collects and forwards telemetry information to Snowplow to understand how our applications are being used.  No identifying information about your sub-account or account fingerprints are ever forwarded to us - it is very simple information about what modules and applications are deployed and active.
@@ -29,14 +27,14 @@ To start loading "enriched" data into Postgres:
 ```hcl
 module "enriched_stream" {
   source  = "snowplow-devops/kinesis-stream/aws"
-  version = "0.1.0"
+  version = "0.1.1"
 
   name = "enriched-stream"
 }
 
 module "pipeline_rds" {
   source  = "snowplow-devops/rds/aws"
-  version = "0.1.3"
+  version = "0.1.4"
 
   name        = "pipeline-rds"
   vpc_id      = var.vpc_id
@@ -86,9 +84,6 @@ module "postgres_loader_enriched" {
   db_name     = local.pipeline_db_name
   db_username = local.pipeline_db_username
   db_password = local.pipeline_db_password
-
-  # Note: the postgres loader can be limited by KCL throughput - increasing this is crucial for anything over 30-40 RPS
-  kcl_write_max_capacity = 50
 }
 ```
 
@@ -97,7 +92,7 @@ To load the "bad" data instead:
 ```hcl
 module "bad_1_stream" {
   source  = "snowplow-devops/kinesis-stream/aws"
-  version = "0.1.0"
+  version = "0.1.1"
 
   name = "bad-1-stream"
 }
@@ -137,9 +132,6 @@ module "postgres_loader_bad" {
   db_name     = local.pipeline_db_name
   db_username = local.pipeline_db_username
   db_password = local.pipeline_db_password
-
-  # Note: the postgres loader can be limited by KCL throughput - increasing this is crucial for anything over 30-40 RPS
-  kcl_write_max_capacity = 50
 }
 ```
 
@@ -150,7 +142,7 @@ As you load data into the database it will start to fill up naturally!  To handl
 ```hcl
 module "pipeline_rds" {
   source  = "snowplow-devops/rds/aws"
-  version = "0.1.3"
+  version = "0.1.4"
 
   # Note: Enables autoscaling storage to up to 100gb from the default 10gb
   max_allocated_storage = 100
@@ -186,9 +178,9 @@ module "pipeline_rds" {
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_kcl_autoscaling"></a> [kcl\_autoscaling](#module\_kcl\_autoscaling) | snowplow-devops/dynamodb-autoscaling/aws | 0.1.0 |
-| <a name="module_tags"></a> [tags](#module\_tags) | snowplow-devops/tags/aws | 0.1.0 |
-| <a name="module_telemetry"></a> [telemetry](#module\_telemetry) | snowplow-devops/telemetry/snowplow | 0.1.0 |
+| <a name="module_kcl_autoscaling"></a> [kcl\_autoscaling](#module\_kcl\_autoscaling) | snowplow-devops/dynamodb-autoscaling/aws | 0.1.1 |
+| <a name="module_tags"></a> [tags](#module\_tags) | snowplow-devops/tags/aws | 0.1.2 |
+| <a name="module_telemetry"></a> [telemetry](#module\_telemetry) | snowplow-devops/telemetry/snowplow | 0.2.0 |
 
 ## Resources
 
@@ -235,8 +227,11 @@ module "pipeline_rds" {
 | <a name="input_cloudwatch_logs_enabled"></a> [cloudwatch\_logs\_enabled](#input\_cloudwatch\_logs\_enabled) | Whether application logs should be reported to CloudWatch; by default they are only on the server | `bool` | `false` | no |
 | <a name="input_cloudwatch_logs_retention_days"></a> [cloudwatch\_logs\_retention\_days](#input\_cloudwatch\_logs\_retention\_days) | The length of time in days to retain logs for | `number` | `7` | no |
 | <a name="input_custom_iglu_resolvers"></a> [custom\_iglu\_resolvers](#input\_custom\_iglu\_resolvers) | The custom Iglu Resolvers that will be used by Enrichment to resolve and validate events | <pre>list(object({<br>    name            = string<br>    priority        = number<br>    uri             = string<br>    api_key         = string<br>    vendor_prefixes = list(string)<br>  }))</pre> | `[]` | no |
+| <a name="input_db_max_connections"></a> [db\_max\_connections](#input\_db\_max\_connections) | The maximum number of connections to the backing database | `number` | `10` | no |
 | <a name="input_default_iglu_resolvers"></a> [default\_iglu\_resolvers](#input\_default\_iglu\_resolvers) | The default Iglu Resolvers that will be used by Enrichment to resolve and validate events | <pre>list(object({<br>    name            = string<br>    priority        = number<br>    uri             = string<br>    api_key         = string<br>    vendor_prefixes = list(string)<br>  }))</pre> | <pre>[<br>  {<br>    "api_key": "",<br>    "name": "Iglu Central",<br>    "priority": 10,<br>    "uri": "http://iglucentral.com",<br>    "vendor_prefixes": []<br>  },<br>  {<br>    "api_key": "",<br>    "name": "Iglu Central - Mirror 01",<br>    "priority": 20,<br>    "uri": "http://mirror01.iglucentral.com",<br>    "vendor_prefixes": []<br>  }<br>]</pre> | no |
 | <a name="input_iam_permissions_boundary"></a> [iam\_permissions\_boundary](#input\_iam\_permissions\_boundary) | The permissions boundary ARN to set on IAM roles created | `string` | `""` | no |
+| <a name="input_in_max_batch_size_checkpoint"></a> [in\_max\_batch\_size\_checkpoint](#input\_in\_max\_batch\_size\_checkpoint) | The maximum number events to process before checkpointing progress on the stream | `number` | `1000` | no |
+| <a name="input_in_max_batch_wait_checkpoint"></a> [in\_max\_batch\_wait\_checkpoint](#input\_in\_max\_batch\_wait\_checkpoint) | The maximum amount of time to wait before checkpointing progress on the stream | `string` | `"10 seconds"` | no |
 | <a name="input_initial_position"></a> [initial\_position](#input\_initial\_position) | Where to start processing the input Kinesis Stream from (TRIM\_HORIZON or LATEST) | `string` | `"TRIM_HORIZON"` | no |
 | <a name="input_instance_type"></a> [instance\_type](#input\_instance\_type) | The instance type to use | `string` | `"t3.micro"` | no |
 | <a name="input_kcl_read_max_capacity"></a> [kcl\_read\_max\_capacity](#input\_kcl\_read\_max\_capacity) | The maximum READ capacity for the KCL DynamoDB table | `number` | `10` | no |
