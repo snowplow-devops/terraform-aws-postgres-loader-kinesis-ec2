@@ -5,22 +5,28 @@
     "streamName": "${in_stream_name}"
     "region": "${region}"
     "initialPosition": "${initial_position}"
-
     "retrievalMode": {
       "type": "Polling"
       "maxRecords": 10000
     }
+    "checkpointSettings": {
+      "maxBatchSize": ${in_max_batch_size_checkpoint}
+      "maxBatchWait": "${in_max_batch_wait_checkpoint}"
+    }
   }
 
   "output": {
-    "type": "Postgres"
-    "host": "${db_host}"
-    "port": ${db_port}
-    "database": "${db_name}"
-    "username": "${db_username}"
-    "password": "${db_password}"
-    "schema": "${schema_name}"
-    "sslMode": "REQUIRE"
+    "good": {
+      "type": "Postgres"
+      "host": "${db_host}"
+      "port": ${db_port}
+      "database": "${db_name}"
+      "username": "${db_username}"
+      "password": "${db_password}"
+      "schema": "${schema_name}"
+      "sslMode": "PREFER"
+      "maxConnections": ${db_max_connections}
+    }
   }
 
   "purpose": "${purpose}"

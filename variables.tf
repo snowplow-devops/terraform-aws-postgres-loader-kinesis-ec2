@@ -109,6 +109,18 @@ variable "in_stream_name" {
   type        = string
 }
 
+variable "in_max_batch_size_checkpoint" {
+  description = "The maximum number events to process before checkpointing progress on the stream"
+  type        = number
+  default     = 1000
+}
+
+variable "in_max_batch_wait_checkpoint" {
+  description = "The maximum amount of time to wait before checkpointing progress on the stream"
+  type        = string
+  default     = "10 seconds"
+}
+
 variable "purpose" {
   description = "The type of data the loader will be pulling which can be one of ENRICHED_EVENTS or JSON (Note: JSON can be used for loading bad rows)"
   type        = string
@@ -154,6 +166,12 @@ variable "db_password" {
   description = "The password to use to connect to the database"
   type        = string
   sensitive   = true
+}
+
+variable "db_max_connections" {
+  description = "The maximum number of connections to the backing database"
+  type        = number
+  default     = 10
 }
 
 # --- Iglu Resolver
