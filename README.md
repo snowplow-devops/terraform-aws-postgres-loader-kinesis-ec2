@@ -29,14 +29,14 @@ To start loading "enriched" data into Postgres:
 ```hcl
 module "enriched_stream" {
   source  = "snowplow-devops/kinesis-stream/aws"
-  version = "0.1.1"
+  version = "0.2.0"
 
   name = "enriched-stream"
 }
 
 module "pipeline_rds" {
   source  = "snowplow-devops/rds/aws"
-  version = "0.1.4"
+  version = "0.2.0"
 
   name        = "pipeline-rds"
   vpc_id      = var.vpc_id
@@ -94,7 +94,7 @@ To load the "bad" data instead:
 ```hcl
 module "bad_1_stream" {
   source  = "snowplow-devops/kinesis-stream/aws"
-  version = "0.1.1"
+  version = "0.2.0"
 
   name = "bad-1-stream"
 }
@@ -167,22 +167,23 @@ module "pipeline_rds" {
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.15 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 3.25.0 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.0.0 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 3.45.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 3.25.0 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 3.45.0 |
 
 ## Modules
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_kcl_autoscaling"></a> [kcl\_autoscaling](#module\_kcl\_autoscaling) | snowplow-devops/dynamodb-autoscaling/aws | 0.1.1 |
-| <a name="module_tags"></a> [tags](#module\_tags) | snowplow-devops/tags/aws | 0.1.2 |
-| <a name="module_telemetry"></a> [telemetry](#module\_telemetry) | snowplow-devops/telemetry/snowplow | 0.2.0 |
+| <a name="module_instance_type_metrics"></a> [instance\_type\_metrics](#module\_instance\_type\_metrics) | snowplow-devops/ec2-instance-type-metrics/aws | 0.1.2 |
+| <a name="module_kcl_autoscaling"></a> [kcl\_autoscaling](#module\_kcl\_autoscaling) | snowplow-devops/dynamodb-autoscaling/aws | 0.2.0 |
+| <a name="module_tags"></a> [tags](#module\_tags) | snowplow-devops/tags/aws | 0.2.0 |
+| <a name="module_telemetry"></a> [telemetry](#module\_telemetry) | snowplow-devops/telemetry/snowplow | 0.3.0 |
 
 ## Resources
 
@@ -235,7 +236,8 @@ module "pipeline_rds" {
 | <a name="input_in_max_batch_size_checkpoint"></a> [in\_max\_batch\_size\_checkpoint](#input\_in\_max\_batch\_size\_checkpoint) | The maximum number events to process before checkpointing progress on the stream | `number` | `1000` | no |
 | <a name="input_in_max_batch_wait_checkpoint"></a> [in\_max\_batch\_wait\_checkpoint](#input\_in\_max\_batch\_wait\_checkpoint) | The maximum amount of time to wait before checkpointing progress on the stream | `string` | `"10 seconds"` | no |
 | <a name="input_initial_position"></a> [initial\_position](#input\_initial\_position) | Where to start processing the input Kinesis Stream from (TRIM\_HORIZON or LATEST) | `string` | `"TRIM_HORIZON"` | no |
-| <a name="input_instance_type"></a> [instance\_type](#input\_instance\_type) | The instance type to use | `string` | `"t3.micro"` | no |
+| <a name="input_instance_type"></a> [instance\_type](#input\_instance\_type) | The instance type to use | `string` | `"t3a.micro"` | no |
+| <a name="input_java_opts"></a> [java\_opts](#input\_java\_opts) | Custom JAVA Options | `string` | `"-Dorg.slf4j.simpleLogger.defaultLogLevel=info -XX:MinRAMPercentage=50 -XX:MaxRAMPercentage=75"` | no |
 | <a name="input_kcl_read_max_capacity"></a> [kcl\_read\_max\_capacity](#input\_kcl\_read\_max\_capacity) | The maximum READ capacity for the KCL DynamoDB table | `number` | `10` | no |
 | <a name="input_kcl_read_min_capacity"></a> [kcl\_read\_min\_capacity](#input\_kcl\_read\_min\_capacity) | The minimum READ capacity for the KCL DynamoDB table | `number` | `1` | no |
 | <a name="input_kcl_write_max_capacity"></a> [kcl\_write\_max\_capacity](#input\_kcl\_write\_max\_capacity) | The maximum WRITE capacity for the KCL DynamoDB table | `number` | `10` | no |
@@ -257,7 +259,7 @@ module "pipeline_rds" {
 
 # Copyright and license
 
-The Terraform AWS Postgres Loader on EC2 project is Copyright 2021-2021 Snowplow Analytics Ltd.
+The Terraform AWS Postgres Loader on EC2 project is Copyright 2021-2023 Snowplow Analytics Ltd.
 
 Licensed under the [Apache License, Version 2.0][license] (the "License");
 you may not use this software except in compliance with the License.
