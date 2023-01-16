@@ -3,7 +3,7 @@ locals {
   module_version = "0.2.0"
 
   app_name    = "snowplow-postgres-loader"
-  app_version = "0.3.1"
+  app_version = "0.3.3"
 
   local_tags = {
     Name           = var.name
