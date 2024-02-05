@@ -1,6 +1,23 @@
+variable "accept_limited_use_license" {
+  description = "Acceptance of the SLULA terms (https://docs.snowplow.io/limited-use-license-1.0/)"
+  type        = bool
+  default     = false
+
+  validation {
+    condition     = var.accept_limited_use_license
+    error_message = "Please accept the terms of the Snowplow Limited Use License Agreement to proceed."
+  }
+}
+
 variable "name" {
   description = "A name which will be pre-pended to the resources created"
   type        = string
+}
+
+variable "app_version" {
+  description = "App version to use. This variable facilitates dev flow, the modules may not work with anything other than the default value."
+  type        = string
+  default     = "0.3.3"
 }
 
 variable "vpc_id" {
@@ -104,7 +121,7 @@ variable "cloudwatch_logs_retention_days" {
 
 variable "java_opts" {
   description = "Custom JAVA Options"
-  default     = "-Dorg.slf4j.simpleLogger.defaultLogLevel=info -XX:MinRAMPercentage=50 -XX:MaxRAMPercentage=75"
+  default     = "-XX:InitialRAMPercentage=75 -XX:MaxRAMPercentage=75"
   type        = string
 }
 
