@@ -1,12 +1,12 @@
 readonly CONFIG_DIR=/opt/snowplow/config
 
 sudo mkdir -p $${CONFIG_DIR}
-sudo cat << EOF > $${CONFIG_DIR}/postgres_loader.json
-${config}
+sudo base64 --decode << EOF > $${CONFIG_DIR}/postgres_loader.json
+${config_b64}
 EOF
 
-sudo cat << EOF > $${CONFIG_DIR}/iglu_resolver.json
-${iglu_resolver}
+sudo base64 --decode << EOF > $${CONFIG_DIR}/iglu_resolver.json
+${iglu_resolver_b64}
 EOF
 
 # Create the schema to load data into
@@ -22,7 +22,7 @@ sudo docker run \
   --log-opt awslogs-group=${cloudwatch_log_group_name} \
   --log-opt awslogs-stream=$(get_instance_id) \
 %{ endif ~}
-  -v $${CONFIG_DIR}:/snowplow/config \
+  --mount type=bind,source=$${CONFIG_DIR},target=/snowplow/config \
   -e 'PGUSER=${db_username}' \
   -e 'PGPASSWORD=${db_password}' \
   postgres:13 \
@@ -43,8 +43,10 @@ sudo docker run \
   --log-opt max-size=10m \
   --log-opt max-file=5 \
 %{ endif ~}
-  -v $${CONFIG_DIR}:/snowplow/config \
-  -e 'JAVA_OPTS=${java_opts}' \
+  --mount type=bind,source=$${CONFIG_DIR},target=/snowplow/config \
+  --env JDK_JAVA_OPTIONS='${java_opts}' \
+  --env ACCEPT_LIMITED_USE_LICENSE=${accept_limited_use_license} \
+  --env INSTANCE_ID=$(get_instance_id) \
   snowplow/snowplow-postgres-loader:${version} \
   --config /snowplow/config/postgres_loader.json \
   --resolver /snowplow/config/iglu_resolver.json

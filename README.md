@@ -54,6 +54,8 @@ module "pipeline_rds" {
 module "postgres_loader_enriched" {
   source = "snowplow-devops/postgres-loader-kinesis-ec2/aws"
 
+  accept_limited_use_license = true
+
   name       = "postgres-loader-enriched-server"
   vpc_id     = var.vpc_id
   subnet_ids = var.subnet_ids
@@ -101,6 +103,8 @@ module "bad_1_stream" {
 
 module "postgres_loader_bad" {
   source = "snowplow-devops/postgres-loader-kinesis-ec2/aws"
+
+  accept_limited_use_license = true
 
   name       = "postgres-loader-bad-server"
   vpc_id     = var.vpc_id
@@ -183,7 +187,7 @@ module "pipeline_rds" {
 | <a name="module_instance_type_metrics"></a> [instance\_type\_metrics](#module\_instance\_type\_metrics) | snowplow-devops/ec2-instance-type-metrics/aws | 0.1.2 |
 | <a name="module_kcl_autoscaling"></a> [kcl\_autoscaling](#module\_kcl\_autoscaling) | snowplow-devops/dynamodb-autoscaling/aws | 0.2.0 |
 | <a name="module_service"></a> [service](#module\_service) | snowplow-devops/service-ec2/aws | 0.2.1 |
-| <a name="module_telemetry"></a> [telemetry](#module\_telemetry) | snowplow-devops/telemetry/snowplow | 0.4.0 |
+| <a name="module_telemetry"></a> [telemetry](#module\_telemetry) | snowplow-devops/telemetry/snowplow | 0.5.0 |
 
 ## Resources
 
@@ -222,7 +226,9 @@ module "pipeline_rds" {
 | <a name="input_ssh_key_name"></a> [ssh\_key\_name](#input\_ssh\_key\_name) | The name of the SSH key-pair to attach to all EC2 nodes deployed | `string` | n/a | yes |
 | <a name="input_subnet_ids"></a> [subnet\_ids](#input\_subnet\_ids) | The list of subnets to deploy the Postgres Loader across | `list(string)` | n/a | yes |
 | <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | The VPC to deploy the Postgres Loader within | `string` | n/a | yes |
+| <a name="input_accept_limited_use_license"></a> [accept\_limited\_use\_license](#input\_accept\_limited\_use\_license) | Acceptance of the SLULA terms (https://docs.snowplow.io/limited-use-license-1.0/) | `bool` | `false` | no |
 | <a name="input_amazon_linux_2_ami_id"></a> [amazon\_linux\_2\_ami\_id](#input\_amazon\_linux\_2\_ami\_id) | The AMI ID to use which must be based of of Amazon Linux 2; by default the latest community version is used | `string` | `""` | no |
+| <a name="input_app_version"></a> [app\_version](#input\_app\_version) | App version to use. This variable facilitates dev flow, the modules may not work with anything other than the default value. | `string` | `"0.3.3"` | no |
 | <a name="input_associate_public_ip_address"></a> [associate\_public\_ip\_address](#input\_associate\_public\_ip\_address) | Whether to assign a public ip address to this instance | `bool` | `true` | no |
 | <a name="input_cloudwatch_logs_enabled"></a> [cloudwatch\_logs\_enabled](#input\_cloudwatch\_logs\_enabled) | Whether application logs should be reported to CloudWatch | `bool` | `true` | no |
 | <a name="input_cloudwatch_logs_retention_days"></a> [cloudwatch\_logs\_retention\_days](#input\_cloudwatch\_logs\_retention\_days) | The length of time in days to retain logs for | `number` | `7` | no |
@@ -235,7 +241,7 @@ module "pipeline_rds" {
 | <a name="input_in_max_batch_wait_checkpoint"></a> [in\_max\_batch\_wait\_checkpoint](#input\_in\_max\_batch\_wait\_checkpoint) | The maximum amount of time to wait before checkpointing progress on the stream | `string` | `"10 seconds"` | no |
 | <a name="input_initial_position"></a> [initial\_position](#input\_initial\_position) | Where to start processing the input Kinesis Stream from (TRIM\_HORIZON or LATEST) | `string` | `"TRIM_HORIZON"` | no |
 | <a name="input_instance_type"></a> [instance\_type](#input\_instance\_type) | The instance type to use | `string` | `"t3a.micro"` | no |
-| <a name="input_java_opts"></a> [java\_opts](#input\_java\_opts) | Custom JAVA Options | `string` | `"-Dorg.slf4j.simpleLogger.defaultLogLevel=info -XX:MinRAMPercentage=50 -XX:MaxRAMPercentage=75"` | no |
+| <a name="input_java_opts"></a> [java\_opts](#input\_java\_opts) | Custom JAVA Options | `string` | `"-XX:InitialRAMPercentage=75 -XX:MaxRAMPercentage=75"` | no |
 | <a name="input_kcl_read_max_capacity"></a> [kcl\_read\_max\_capacity](#input\_kcl\_read\_max\_capacity) | The maximum READ capacity for the KCL DynamoDB table | `number` | `10` | no |
 | <a name="input_kcl_read_min_capacity"></a> [kcl\_read\_min\_capacity](#input\_kcl\_read\_min\_capacity) | The minimum READ capacity for the KCL DynamoDB table | `number` | `1` | no |
 | <a name="input_kcl_write_max_capacity"></a> [kcl\_write\_max\_capacity](#input\_kcl\_write\_max\_capacity) | The maximum WRITE capacity for the KCL DynamoDB table | `number` | `10` | no |
@@ -263,16 +269,9 @@ module "pipeline_rds" {
 
 # Copyright and license
 
-The Terraform AWS Postgres Loader on EC2 project is Copyright 2021-2023 Snowplow Analytics Ltd.
+Copyright 2021-current Snowplow Analytics Ltd.
 
-Licensed under the [Apache License, Version 2.0][license] (the "License");
-you may not use this software except in compliance with the License.
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+Licensed under the [Snowplow Limited Use License Agreement][license]. _(If you are uncertain how it applies to your use case, check our answers to [frequently asked questions][license-faq].)_
 
 [release]: https://github.com/snowplow-devops/terraform-aws-postgres-loader-kinesis-ec2/releases/latest
 [release-image]: https://img.shields.io/github/v/release/snowplow-devops/terraform-aws-postgres-loader-kinesis-ec2
@@ -280,8 +279,9 @@ limitations under the License.
 [ci]: https://github.com/snowplow-devops/terraform-aws-postgres-loader-kinesis-ec2/actions?query=workflow%3Aci
 [ci-image]: https://github.com/snowplow-devops/terraform-aws-postgres-loader-kinesis-ec2/workflows/ci/badge.svg
 
-[license]: https://www.apache.org/licenses/LICENSE-2.0
-[license-image]: https://img.shields.io/badge/license-Apache--2-blue.svg?style=flat
+[license]: https://docs.snowplow.io/limited-use-license-1.0/
+[license-image]: https://img.shields.io/badge/license-Snowplow--Limited--Use-blue.svg?style=flat
+[license-faq]: https://docs.snowplow.io/docs/contributing/limited-use-license-faq/
 
 [registry]: https://registry.terraform.io/modules/snowplow-devops/postgres-loader-kinesis-ec2/aws/latest
 [registry-image]: https://img.shields.io/static/v1?label=Terraform&message=Registry&color=7B42BC&logo=terraform

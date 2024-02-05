@@ -3,7 +3,7 @@ locals {
   module_version = "0.4.3"
 
   app_name    = "snowplow-postgres-loader"
-  app_version = "0.3.3"
+  app_version = var.app_version
 
   local_tags = {
     Name           = var.name
@@ -26,7 +26,7 @@ data "aws_caller_identity" "current" {}
 
 module "telemetry" {
   source  = "snowplow-devops/telemetry/snowplow"
-  version = "0.4.0"
+  version = "0.5.0"
 
   count = var.telemetry_enabled ? 1 : 0
 
@@ -304,15 +304,17 @@ locals {
   })
 
   user_data = templatefile("${path.module}/templates/user-data.sh.tmpl", {
-    config        = local.config
-    iglu_resolver = local.iglu_resolver
-    version       = local.app_version
-    db_host       = var.db_host
-    db_port       = var.db_port
-    db_name       = var.db_name
-    db_username   = var.db_username
-    db_password   = var.db_password
-    schema_name   = var.schema_name
+    accept_limited_use_license = var.accept_limited_use_license
+
+    config_b64        = base64encode(local.config)
+    iglu_resolver_b64 = base64encode(local.iglu_resolver)
+    version           = local.app_version
+    db_host           = var.db_host
+    db_port           = var.db_port
+    db_name           = var.db_name
+    db_username       = var.db_username
+    db_password       = var.db_password
+    schema_name       = var.schema_name
 
     telemetry_script = join("", module.telemetry.*.amazon_linux_2_user_data)
 
