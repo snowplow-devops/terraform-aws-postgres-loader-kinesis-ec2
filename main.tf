@@ -1,6 +1,6 @@
 locals {
   module_name    = "postgres-loader-kinesis-ec2"
-  module_version = "0.4.3"
+  module_version = "0.5.0"
 
   app_name    = "snowplow-postgres-loader"
   app_version = var.app_version
