@@ -14,6 +14,10 @@ sudo cat << EOF > $${CONFIG_DIR}/create-schema.sql
 CREATE SCHEMA IF NOT EXISTS ${schema_name};
 EOF
 
+%{ if is_private_ecr_registry }
+aws ecr get-login-password --region ${region} | docker login --username AWS --password-stdin ${private_ecr_registry}
+%{ endif ~}
+
 sudo docker run \
   --name create_schema \
   --network host \
@@ -25,7 +29,7 @@ sudo docker run \
   --mount type=bind,source=$${CONFIG_DIR},target=/snowplow/config \
   -e 'PGUSER=${db_username}' \
   -e 'PGPASSWORD=${db_password}' \
-  postgres:13 \
+  ${private_ecr_registry}postgres:13 \
   psql -h ${db_host} -d ${db_name} -p ${db_port} -f /snowplow/config/create-schema.sql
 
 # Launch the loader
@@ -47,7 +51,7 @@ sudo docker run \
   --env JDK_JAVA_OPTIONS='${java_opts}' \
   --env ACCEPT_LIMITED_USE_LICENSE=${accept_limited_use_license} \
   --env INSTANCE_ID=$(get_instance_id) \
-  snowplow/snowplow-postgres-loader:${version} \
+  ${private_ecr_registry}snowplow/snowplow-postgres-loader:${version} \
   --config /snowplow/config/postgres_loader.json \
   --resolver /snowplow/config/iglu_resolver.json
 
